@@ -1,6 +1,9 @@
 import pulp
 import math
+import helper
+import sys
 
+readings = helper.parse_data(sys.argv[1])
 # actual and calculated temperatures
 t_actual = pulp.LpVariable("t_a")
 t_calculated = pulp.LpVariable("t_c")
@@ -17,27 +20,29 @@ x4 = pulp.LpVariable("x4")
 x5 = pulp.LpVariable("x5")
 
 # minimize z
-prob = pulp.LpProblem("best_fit",pulp.LpMinimize)
+prob = pulp.LpProblem("best_fit", pulp.LpMinimize)
 prob += z, "obj"
 
 # compare actual readings with calculated readings
 for reading in readings:
-    prob += 
-    (x0) + 
-    (x1 * reading.day) + 
-    (x2*math.cos((2*math.pi()*reading.day)/365.25)) + 
-    (x3*math.sin((2*math.pi()*reading.day)/365.25)) +
-    (x4*math.cos((2*math.pi()*reading.day)/(365.25*10.7))) +
-    (x5*math.sin((2*math.pi()*reading.day)/(365.25*10.7))) -
-    reading.temp <= z
-    prob +=
-    (x0) + 
-    (x1 * reading.day) + 
-    (x2*math.cos((2*math.pi()*reading.day)/365.25)) + 
-    (x3*math.sin((2*math.pi()*reading.day)/365.25)) +
-    (x4*math.cos((2*math.pi()*reading.day)/(365.25*10.7))) +
-    (x5*math.sin((2*math.pi()*reading.day)/(365.25*10.7))) -
-    reading.temp >= -z
+    prob += (
+        (x0) +
+        (x1 * reading[1]) +
+        (x2*math.cos((2*math.pi*reading[1])/365.25)) +
+        (x3*math.sin((2*math.pi*reading[1])/365.25)) +
+        (x4*math.cos((2*math.pi*reading[1])/(365.25*10.7))) +
+        (x5*math.sin((2*math.pi*reading[1])/(365.25*10.7))) -
+        reading[0] <= z
+    )
+    prob += (
+        (x0) +
+        (x1 * reading[1]) +
+        (x2*math.cos((2*math.pi*reading[1])/365.25)) +
+        (x3*math.sin((2*math.pi*reading[1])/365.25)) +
+        (x4*math.cos((2*math.pi*reading[1])/(365.25*10.7))) +
+        (x5*math.sin((2*math.pi*reading[1])/(365.25*10.7))) -
+        reading[0] >= -z
+    )
 
 # compute
 status = prob.solve()
